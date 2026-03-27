@@ -1,4 +1,5 @@
-注1：本文档参考[1. Slurm简介 — Slurm资源管理与作业调度系统安装配置 2021-12 文档](https://scc.ustc.edu.cn/hmli/doc/linux/slurm-install/slurm-install.html)
+# Slurm 单节点安装 （Ubuntu）
+注1：本文档参考[1. Slurm简介 — Slurm资源管理与作业调度系统安装配置 2021-12 文档](https://scc.ustc.edu.cn/hmli/doc/linux/slurm-install/slurm-install.html)    
 注2：本文档仅适用于单台服务器，采用的发行版为 Ubuntu24.04，所有命令均使用 root 用户在命令行下执行。
 
 > **Slurm** (**S**imple **L**inux **U**tility for **R**esource **M**anagement) 是开源的、具有容错性和高度可扩展的 Linux集群资源管理和作业调度系统。Linux 操作系统可利用 Slurm 对资源和作业进行管理，以避免相互干扰，提高运行效率。
