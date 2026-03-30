@@ -32,7 +32,7 @@ Please, press ENTER to continue
 Do you accept the license terms? [yes|no]
 >>> yes  # 输入yes
 
-Miniconda3 will now be installed into this location:
+Anaconda3 will now be installed into this location:
 /home/peter/anaconda3
 
   - Press ENTER to confirm the location
