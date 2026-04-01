@@ -24,7 +24,7 @@ https://docs.crystaltoolkit.org/index.html
 ### 计算相关
 VASP INCAR 参数查询 https://www.vasp.at/wiki/index.php/Category:INCAR_tag   
 LAMMPS 命令查询 https://docs.lammps.org/commands_list.html  
-i-PI https://docs.ipi-code.org/index.html
+i-PI https://docs.ipi-code.org/index.html  
 GPUMD https://gpumd.org/  
 xtb https://xtb-docs.readthedocs.io/en/latest/  
 
