@@ -1,6 +1,6 @@
 # Slurm 单节点安装 （Ubuntu）
 注1：本文档参考[1. Slurm简介 — Slurm资源管理与作业调度系统安装配置 2021-12 文档](https://scc.ustc.edu.cn/hmli/doc/linux/slurm-install/slurm-install.html)    
-注2：本文档仅适用于单台服务器，采用的发行版为 Ubuntu24.04，所有命令均使用 root 用户在命令行下执行。
+注2：本文档仅适用于单台服务器，所有命令均使用 root 用户在命令行下执行。
 
 > **Slurm** (**S**imple **L**inux **U**tility for **R**esource **M**anagement) 是开源的、具有容错性和高度可扩展的 Linux集群资源管理和作业调度系统。Linux 操作系统可利用 Slurm 对资源和作业进行管理，以避免相互干扰，提高运行效率。
 
@@ -207,3 +207,156 @@ WantedBy=multi-user.target
 systemctl restart slurmctld
 systemctl restart slurmd
 ```
+
+# Slurm 单节点安装 （Rocky）
+
+部分步骤与在 Ubuntu 上的安装方式存在差异
+### 编译安装 Slurm
+
+**安装编译 Slurm 所需软件包**
+
+```bash
+yum -y install mariadb mariadb-server munge munge-libs hwloc-libs hwloc-devel hdf5-devel pam-devel perl-ExtUtils-MakeMaker python3 readline-devel kernel-headers dbus-devel rpm-build
+dnf --enablerepo=devel install mariadb-devel munge-devel
+```
+
+**下载 Slurm 源码包**
+
+```bash
+wget https://download.schedmd.com/slurm/slurm-24.05.7.tar.bz2
+```
+
+**编译成 RPM 包**
+
+```bash
+rpmbuild -ta slurm-24.05.7.tar.bz2
+```
+
+### 管理节点操作
+
+**设置 Slurm 的 YUM 软件仓库**
+
++ 建立 YUM 仓库目录：
+```bash
+mkdir -p /opt/slurm
+```
+
++ 复制前面生成的 RPM 文件到 /opt/slurm/ 目录下：
+```bash
+cp /root/rpmbuild/RPMS/x86_64/*.rpm /opt/slurm/
+```
+
++ 生成本地库索引，在 /opt/src/slurm/ 目录下执行：
+```bash
+yum -y install createrepo
+cd /opt/slurm
+createrepo .
+```
+
++ 生成 repo 配置文件：
+```bash
+cat >/etc/yum.repos.d/slurm.repo<<EOF
+[slurm]
+name=slurm
+baseurl=file:///opt/slurm
+gpgcheck=0
+enable=1
+EOF
+```
+
+**安装所需 slurm 包**
+
+```bash
+yum -y install slurm slurm-perlapi slurm-slurmdbd slurm-slurmctld 
+yum -y install slurm-slurmd
+```
+
+**生成 slurm 用户**
+
+```bash
+useradd slurm
+```
+
+**设置主配置文件**
+
+主配置文件：/etc/slurm/slurm.conf 
+内容模板可访问 https://slurm.schedmd.com/congurator.html
+
+**设置 cgroup 限制**
+
+cgroup 配置文件：/etc/slurm/cgroup.conf
+启用 cgroup 资源限制，可以防止用户实际使用的资源超过用户为该作业通过作业 调度系统申请到的资源。如不需限制，不要在 /etc/slurm/slurm.conf 中设定 ProctrackType=proctrack/cgroup 及 TaskPlugin=task/cgroup 参数
+
+**GPU 等资源配置**
+
+/etc/slurm/gres.conf 文件内容：
+```
+NodeName=master Name=gpu File=/dev/nvidia0
+```
+
+**设置 Slurm 文件权限**
+
++ /etc/slurm/slurm.conf 文件所有者须为 root 用户：
+```bash
+chown root /etc/slurm/slurm.conf
+```
+
++ 建立 slurmctld 服务存储其状态等的目录，由 slurm.conf 中 StateSaveLocation 参数定义：
+```bash
+mkdir /var/spool/slurmctld
+```
+
++ 设置 /var/spool/slurmctld 目录所有者为 slurm 用户：
+```bash
+chown slurm /var/spool/slurmctld
+```
+
+**计算节点设置slurmd服务**
+
+在 /usr/lib/systemd/system/ 下建立 slurmd.service 文件，其内容为：
+```
+[Unit]
+Description=Slurm node daemon
+After=munge.service network-online.target remote-fs.target sssd.service
+Wants=network-online.target
+#ConditionPathExists=/etc/slurm/slurm.conf
+
+[Service]
+Type=notify
+EnvironmentFile=-/etc/sysconfig/slurmd
+EnvironmentFile=-/etc/default/slurmd
+RuntimeDirectory=slurm
+RuntimeDirectoryMode=0755
+ExecStart=/usr/sbin/slurmd --systemd $SLURMD_OPTIONS
+ExecReload=/bin/kill -HUP $MAINPID
+KillMode=process
+LimitNOFILE=131072
+LimitMEMLOCK=infinity
+LimitSTACK=infinity
+Delegate=yes
+TasksMax=infinity
+
+# Uncomment the following lines to disable logging through journald.
+# NOTE: It may be preferable to set these through an override file instead.
+#StandardOutput=null
+#StandardError=null
+
+[Install]
+WantedBy=multi-user.target
+```
+
+**重启 slurmctld 服务和 slurmd 服务**
+
+```bash
+systemctl restart slurmctld
+systemctl restart slurmd
+```
+
+
+**可能存在的问题**
+
+```
+munged: Error: Failed to check keyfile "/etc/munge/munge.key": No such file or directory
+```
+
+解决方法：`create-munge-key` 命令
