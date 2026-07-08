@@ -7,7 +7,6 @@ import matplotlib.ticker as ticker
 
 # 自定义绘图函数
 def myplot(df, filename, ylabel, legend):
-    plt.figure(figsize=(20,16))
     colors = ['#FF9999', '#66B3FF', '#99FF99', '#FFCC99']
     # 绘制分组柱状图
     ax = df.plot(kind='bar', figsize=(12, 6), width=0.8, color=colors, linewidth=0)
