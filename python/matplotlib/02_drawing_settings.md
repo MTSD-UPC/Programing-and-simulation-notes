@@ -1,11 +1,13 @@
 # 绘图设置
 
 ### 导入 matplotlib
+
 ```python
 import matplotlib.pyplot as plt
 ```
 
 ### 正确显示中文
+
 **方法一**
 ```python
 plt.rcParams['font.sans-serif'] = 'SimHei'

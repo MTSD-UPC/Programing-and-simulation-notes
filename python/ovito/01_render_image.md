@@ -10,7 +10,6 @@ from ovito.vis import Viewport,TachyonRenderer
 
 pipeline = import_file('test.data')
 pipeline.add_to_scene()
-vp = Viewport()
 vp = Viewport(type = Viewport.Type.Perspective, camera_dir = (0, 1, 0))
 vp.zoom_all()
 vp.render_image(filename='simulation.png', 
