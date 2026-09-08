@@ -27,7 +27,6 @@ def myplot(df, filename, ylabel, legend):
     # plt.savefig(filename, dpi=600)
     plt.show()
 
-
 data = [
     [56.18, 24.5, 10.74, 5.28],
     [59.77, 40.13, 12.27, 10.17],
@@ -48,3 +47,4 @@ myplot(df, filename, ylabel, legend)
 # 效果
 
 ![](./figures/grouped_bar.png)
+
